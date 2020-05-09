@@ -1,0 +1,9 @@
+NONE = 0;
+STAR = 1;
+CIRCLE = 2;
+DIAMOND = 3;
+TRIANGLE = 4;
+MOON = 5;
+SQUARE = 6;
+CROSS = 7;
+SKULL = 8;
