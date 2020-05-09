@@ -4,14 +4,14 @@
 #@non-retail@
 ## Interface: 11304
 #@end-non-retail@
-## X-Curse-Project-ID: 373461
+## X-Curse-Project-ID: 382225
 ## Title: PajMarker
 ## Notes: mark stuff
 ## Author: Pajlada
 ## DefaultState: enabled
 ## LoadOnDemand: 0
 ## SavedVariables: Enabled
-## Version: 1.0.4
+## Version: 1.0.1
 
 Libs\ChatThrottleLib\ChatThrottleLib.xml
 embeds.xml
