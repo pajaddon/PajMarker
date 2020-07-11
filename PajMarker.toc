@@ -4,7 +4,7 @@
 #@non-retail@
 ## Interface: 11305
 #@end-non-retail@
-## X-Curse-Project-ID: 373461
+## X-Curse-Project-ID: 382225
 ## Title: PajMarker
 ## Notes: mark stuff
 ## Author: Pajlada
