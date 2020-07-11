@@ -11,7 +11,7 @@
 ## DefaultState: enabled
 ## LoadOnDemand: 0
 ## SavedVariables: Enabled
-## Version: 1.0.5
+## Version: 1.0.6
 
 Libs\ChatThrottleLib\ChatThrottleLib.xml
 embeds.xml
