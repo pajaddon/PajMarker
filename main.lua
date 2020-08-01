@@ -133,6 +133,15 @@ function TryMarkUnit(unit)
     session[unitGuid] = true
 end
 
+local function TrySwitchList(unitName)
+    local trigger = triggers[unitName];
+
+    if trigger ~= nil and trigger ~= currentList then
+        print("Switching to list " .. trigger)
+        currentList = trigger
+    end
+end
+
 function events:PLAYER_TARGET_CHANGED()
     local unitName = GetUnitName("target");
     if unitName == nil then
@@ -143,14 +152,9 @@ function events:PLAYER_TARGET_CHANGED()
         return
     end
 
+    TrySwitchList(unitName)
+
     TryMarkUnit("target")
-
-    local trigger = triggers[unitName];
-
-    if trigger ~= nil and trigger ~= currentList then
-        print("Switching to list " .. trigger)
-        currentList = trigger
-    end
 end
 
 function events:UPDATE_MOUSEOVER_UNIT()
