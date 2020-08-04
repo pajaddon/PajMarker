@@ -1,76 +1,131 @@
-local addonName, addon = ...
+addonName = "PajMarker"
+PajMarker = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceEvent-3.0")
 
-addon.db = {
-    enabled = false,
-}
+local version = GetAddOnMetadata(addonName, "Version") or 9999;
 
-local frame, events = CreateFrame("FRAME"), {};
+function PajMarker:OnInitialize()
+    self.libs = {
+        AceGUI = LibStub("AceGUI-3.0"),
+        AceSerializer = LibStub("AceSerializer-3.0"),
+    }
 
-local addonPrefix = "pm_";
+    self:InitializeChatCommands()
 
-local currentList = "";
+    self:InitializeEvents()
 
-local session = {};
+    self.triggers = {}
+    self.list = {}
+    self.window = nil
+    self.session = {}
 
--- TODO: Save last "currentList" value
+    self.currentList = ""
 
-local triggers = {};
+    local defaults = {
+        profile = {
+            enabled = true,
+            resetOnListChange = false,
+        }
+    }
+    self.db = LibStub("AceDB-3.0"):New("DB", defaults)
 
-for listName in pairs(lists) do
-    for mobName in pairs(lists[listName]) do
-        triggers[mobName] = listName;
+    local options = {
+        name = addonName,
+        handler = self,
+        type = 'group',
+        args = {
+            general = {
+                name = "General",
+                type = 'group',
+                args = {
+                    __description = {
+                        type = 'description',
+                        name = 'This addon aims to make life easier for raid leaders or whoever is responsible for marking targets in a raid. It gives a way for the user to keep lists of targets and their desired marks, and automatically assign those marks when the user hovers over one of those targets.',
+                        order = 1,
+                    },
+                    enabled = {
+                        type = 'toggle',
+                        name = 'Enabled',
+                        desc = 'Enables the marking of units',
+                        set = function(info, val) PajMarker.db.profile.enabled = val; PajMarker:RefreshConfig() end,
+                        get = function(info) return PajMarker.db.profile.enabled end,
+                        width = "full",
+                        order = 10,
+                    },
+                    resetOnListChange = {
+                        type = 'toggle',
+                        name = 'Reset session on list change',
+                        desc = 'Reset the session automatically whenever the list is changed',
+                        set = function(info, val) PajMarker.db.profile.resetOnListChange = val end,
+                        get = function(info) return PajMarker.db.profile.resetOnListChange end,
+                        width = "full",
+                        order = 20,
+                    },
+                    configureLists = {
+                        type = 'execute',
+                        name = 'Configure lists',
+                        func = "ConfigureLists",
+                        order = 30,
+                    }
+                }
+            },
+            lists = {
+                name = "Lists",
+                type = "input",
+                hidden = true,
+            }
+        }
+    }
+
+    options.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+
+    LibStub("AceConfig-3.0"):RegisterOptionsTable(addonName, options, nil)
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions(addonName, addonName, nil, "general")
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions(addonName, "Profile", addonName, "profile")
+
+    self.db.RegisterCallback(self, "OnProfileChanged", "RefreshConfig")
+    self.db.RegisterCallback(self, "OnProfileCopied", "RefreshConfig")
+    self.db.RegisterCallback(self, "OnProfileReset", "RefreshConfig")
+    self.db.RegisterCallback(self, "OnDatabaseReset", "RefreshConfig")
+end
+
+function PajMarker:OnEnable()
+    self:RefreshConfig()
+end
+
+function PajMarker:RefreshConfig()
+    if self.db.profile.enabled then
+        self:RegisterEvents()
+    else
+        self:UnregisterEvents()
+    end
+
+    if self.db.profile.lists then
+        success, self.lists = self.libs.AceSerializer:Deserialize(self.db.profile.lists)
+    else
+        self.lists = {}
+    end
+
+    self.triggers = {}
+
+    for listName, list in pairs(self.lists) do
+        for mobName in pairs(list) do
+            self.triggers[mobName] = listName
+        end
     end
 end
 
-function HandleAddonMessage(message, sender)
-    if session["usedMarks"] == nil then
-        session["usedMarks"] = {};
-    end
-
-    session["usedMarks"][message] = true;
-
-    -- print(prefix)
-    print(message)
-    -- print(distribution)
-    -- print(sender)
+function PajMarker:ConfigureLists()
+    self:ShowGUI()
 end
 
--- function events:CHAT_MSG_ADDON(prefix, message, distribution, sender)
---     if prefix ~= addonPrefix then
---         return
---     end
--- 
---     if distribution ~= "RAID" then
---         return
---     end
--- 
---     HandleAddonMessage(message, sender)
--- end
-
-function events:ADDON_LOADED(arg1)
-    if arg1 ~= addonName then
-        return
-    end
-
-    addon.db.enabled = Enabled
-end
-
-function events:PLAYER_LOGOUT()
-    Enabled = addon.db.enabled
-end
-
-function NotifyRaid(marker)
-    -- ChatThrottleLib:SendAddonMessage("ALERT", addonPrefix, tostring(marker), "raid")
-end
-
-function TryMarkUnit(unit)
-    local unitGuid, unitName = UnitGUID(unit), GetUnitName(unit);
+function PajMarker:TryMarkUnit(unit)
+    local unitGuid, unitName = UnitGUID(unit), GetUnitName(unit)
     if unitName == nil or unitGuid == nil then
         -- Removed target
         return
     end
 
-    local list = lists[currentList];
+    local list = self.lists[self.currentList]
 
     if list == nil then
         -- No list has been chosen
@@ -81,8 +136,8 @@ function TryMarkUnit(unit)
     local currentTarget = GetRaidTargetIndex(unit)
 
     -- Have we already marked this unit in this session?
-    if session[unitGuid] ~= nil then
-        -- print("Already marked guid")
+    if self.session[unitGuid] ~= nil then
+        -- self:Print("Already marked guid")
         return
     end
 
@@ -91,15 +146,15 @@ function TryMarkUnit(unit)
         return
     end
 
-    if session["usedMarks"] == nil then
-        session["usedMarks"] = {};
+    if self.session["usedMarks"] == nil then
+        self.session["usedMarks"] = {}
     end
 
-    local markerIndex = session[unitName] or 1;
+    local markerIndex = self.session[unitName] or 1
     local marker = nil
     while markerIndex ~= nil do
         marker = list[unitName][markerIndex]
-        if (marker ~= nil or markerIndex > 8) and session["usedMarks"][marker] ~= true then
+        if (marker ~= nil or markerIndex > 8) and self.session["usedMarks"][marker] ~= true then
             -- We've run out potential markers, or hit a marker
             break
         end
@@ -108,143 +163,44 @@ function TryMarkUnit(unit)
     end
 
     if marker == nil then
-        -- print("No marker for unit found")
+        -- self:Print("No marker for unit found")
         return
     end
 
-    if session["usedMarks"][marker] == true then
+    if self.session["usedMarks"][marker] == true then
         -- We (or someone else) has already used this mark
-        -- print("Already used mark " .. marker)
+        -- self:Print("Already used mark " .. marker)
         return
     end
 
-    session["usedMarks"][marker] = true;
+    self.session["usedMarks"][marker] = true
 
     local currentMarker = GetRaidTargetIndex(unit)
     if currentMarker ~= marker then
         SetRaidTarget(unit, marker)
-        session["mark"..marker] = true
-
-        NotifyRaid(marker)
-        -- print("Set raid marker to " .. unitName .. " - Marking it with " .. marker)
+        self.session["mark"..marker] = true
     end
 
-    session[unitName] = markerIndex + 1
-    session[unitGuid] = true
+    self.session[unitName] = markerIndex + 1
+    self.session[unitGuid] = true
 end
 
-local function TrySwitchList(unitName)
-    local trigger = triggers[unitName];
+-- Try to switch to the list containing the given unit
+-- UNDEFINED BEHAVIOUR: If a unit is contained within multiple lists, the list that will be chosen is ??
+function PajMarker:TrySwitchList(unitName)
+    local trigger = self.triggers[unitName]
 
-    if trigger ~= nil and trigger ~= currentList then
-        print("Switching to list " .. trigger)
-        currentList = trigger
+    if trigger ~= nil and trigger ~= self.currentList then
+        self:Print("Switching to list " .. trigger)
+        self.currentList = trigger
+
+        if self.db.profile.resetOnListChange then
+            self:ResetSession()
+        end
     end
 end
 
-function events:PLAYER_TARGET_CHANGED()
-    local unitName = GetUnitName("target");
-    if unitName == nil then
-        return
-    end
-
-    if UnitIsDead("target") then
-        return
-    end
-
-    TrySwitchList(unitName)
-
-    TryMarkUnit("target")
+function PajMarker:ResetSession()
+    self.session = {}
+    self:Print("Session has been reset")
 end
-
-function events:UPDATE_MOUSEOVER_UNIT()
-    if UnitIsDead("mouseover") then
-        return
-    end
-
-    TryMarkUnit("mouseover")
-end
-
-frame:SetScript("OnEvent", function(self, event, ...)
-    events[event](self, ...);
-end);
-for k, v in pairs(events) do
-    frame:RegisterEvent(k);
-end
-
-frame.name = addonName
-addon.frame = frame
-
-local function ResetUsage()
-    print(' /pm reset - reset the current session')
-end
-
-local function Usage()
-    print('PajMarker usage:')
-    print(' /pm help - show this help message')
-    ResetUsage()
-end
-
-local function ResetSession()
-    session = {};
-    print("Session has been reset");
-end
-
-local function PMReset(commands, command_i)
-    ResetSession()
-end
-
-local function PMClear(commands, command_i)
-    SetRaidTarget("player", 1)
-    SetRaidTarget("player", 2)
-    SetRaidTarget("player", 3)
-    SetRaidTarget("player", 4)
-    SetRaidTarget("player", 5)
-    SetRaidTarget("player", 6)
-    SetRaidTarget("player", 7)
-    SetRaidTarget("player", 8)
-    SetRaidTarget("player", 0)
-end
-
-local function PMList(commands, command_i)
-    currentList = commands[command_i] or ""
-    print("Current list changed to " .. currentList)
-    ResetSession()
-end
-
-local function PMDebug(commands, command_i)
-    --
-end
-
-local function PM(msg, editbox)
-    commands = split(msg, " ")
-    command_i = 1
-
-    if commands[command_i] == "reset" then
-        PMReset(commands, command_i + 1)
-        return
-    end
-
-    if commands[command_i] == "clear" then
-        PMClear(commands, command_i + 1)
-        return
-    end
-
-    if commands[command_i] == "list" then
-        PMList(commands, command_i + 1)
-        return
-    end
-
-    if commands[command_i] == "debug" then
-        PMDebug(commands, command_i + 1)
-        return
-    end
-
-    Usage()
-end
-
-SLASH_PM1 = '/pm'
-
-SlashCmdList["PM"] = PM
-
--- C_ChatInfo.RegisterAddonMessagePrefix(addonPrefix);
