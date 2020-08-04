@@ -1,3 +1,5 @@
+local addonName = ...
+
 function PajMarker:ShowGUI()
     if self.window ~= nil then
         self:Print("GUI already open :)")

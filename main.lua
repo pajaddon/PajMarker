@@ -1,4 +1,5 @@
-addonName = "PajMarker"
+local addonName = ...
+
 PajMarker = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceEvent-3.0")
 
 local version = GetAddOnMetadata(addonName, "Version") or 9999;

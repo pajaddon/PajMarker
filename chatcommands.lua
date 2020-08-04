@@ -1,3 +1,5 @@
+local addonName = ...
+
 function PajMarker:InitializeChatCommands()
     -- Register /pm to call HandlePM using AceConsole-3.0
     self:RegisterChatCommand("pm", "HandlePM")
