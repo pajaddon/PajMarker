@@ -44,29 +44,42 @@ function PajMarker:OnInitialize()
                         order = 1,
                     },
                     enabled = {
-                        type = 'toggle',
-                        name = 'Enabled',
-                        desc = 'Enables the marking of units',
+                        type = "toggle",
+                        name = "Enabled",
+                        desc = "Enables the marking of units",
                         set = function(info, val) PajMarker.db.profile.enabled = val; PajMarker:RefreshConfig() end,
                         get = function(info) return PajMarker.db.profile.enabled end,
                         width = "full",
                         order = 10,
                     },
                     resetOnListChange = {
-                        type = 'toggle',
-                        name = 'Reset session on list change',
-                        desc = 'Reset the session automatically whenever the list is changed',
+                        type = "toggle",
+                        name = "Reset session on list change",
+                        desc = "Reset the session automatically whenever the list is changed",
                         set = function(info, val) PajMarker.db.profile.resetOnListChange = val end,
                         get = function(info) return PajMarker.db.profile.resetOnListChange end,
                         width = "full",
                         order = 20,
                     },
                     configureLists = {
-                        type = 'execute',
-                        name = 'Configure lists',
+                        type = "execute",
+                        name = "Configure lists",
                         func = "ConfigureLists",
+                        width = "full",
                         order = 30,
-                    }
+                    },
+                    exportLists = {
+                        type = "execute",
+                        name = "Export lists",
+                        func = "ExportLists",
+                        order = 40,
+                    },
+                    importLists = {
+                        type = "execute",
+                        name = "Import lists",
+                        func = "ImportLists",
+                        order = 45,
+                    },
                 }
             },
             lists = {
@@ -117,6 +130,14 @@ end
 
 function PajMarker:ConfigureLists()
     self:ShowGUI()
+end
+
+function PajMarker:ExportLists()
+    self:ShowExportWindow()
+end
+
+function PajMarker:ImportLists()
+    self:ShowImportWindow()
 end
 
 function PajMarker:TryMarkUnit(unit)

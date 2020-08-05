@@ -1,5 +1,92 @@
 local addonName = ...
 
+function PajMarker:ShowExportWindow()
+    if self.exportWindow ~= nil then
+        self:Print("Expoort window is already open")
+        return
+    end
+
+    local AceGUI = self.libs.AceGUI
+
+    self.exportWindow = AceGUI:Create("Window")
+    self.exportWindow:SetLayout("List")
+    self.exportWindow:SetCallback("OnClose", function(widget)
+        AceGUI:Release(widget)
+        self.exportWindow = nil
+    end)
+
+    local label = AceGUI:Create("Label")
+    label:SetText("Copy the below text to whomever you want to share your lists with")
+    self.exportWindow:AddChild(label)
+
+    local sg = AceGUI:Create("SimpleGroup")
+    sg:SetLayout("Fill")
+    sg:SetFullWidth(true)
+    sg:SetFullHeight(true)
+
+    local editbox = AceGUI:Create("MultiLineEditBox")
+    local exportString = self.libs.AceSerializer:Serialize(self.lists)
+    editbox:SetText(exportString)
+    editbox:SetFocus()
+    editbox:HighlightText()
+    editbox:SetFullWidth(true)
+    editbox:SetFullHeight(true)
+    editbox:DisableButton()
+
+    sg:AddChild(editbox)
+
+    self.exportWindow:AddChild(sg)
+end
+
+function PajMarker:ShowImportWindow()
+    if self.importWindow ~= nil then
+        self:Print("Expoort window is already open")
+        return
+    end
+
+    local AceGUI = self.libs.AceGUI
+
+    self.importWindow = AceGUI:Create("Window")
+    self.importWindow:SetLayout("List")
+    self.importWindow:SetCallback("OnClose", function(widget)
+        AceGUI:Release(widget)
+        self.importWindow = nil
+    end)
+
+    local label = AceGUI:Create("Label")
+    label:SetText("Paste the export string below and press the button - do note that any current lists will be overridden")
+    self.importWindow:AddChild(label)
+
+    local sg = AceGUI:Create("SimpleGroup")
+    sg:SetLayout("Fill")
+    sg:SetFullWidth(true)
+    sg:SetFullHeight(true)
+
+    local editbox = AceGUI:Create("MultiLineEditBox")
+    editbox:SetFocus()
+    editbox:SetFullWidth(true)
+    editbox:SetFullHeight(true)
+    editbox:SetCallback("OnEnterPressed", function(_, _, importString)
+        -- Try to deserialize the string
+        local success, _ = self.libs.AceSerializer:Deserialize(importString)
+        if not success then
+            self:Print("Error deserializing import string :( - make sure it's not malformed")
+            return
+        end
+
+        self:Print("Successfully imported the lists!")
+        self.db.profile.lists = importString
+
+        self:RefreshConfig()
+
+        self.importWindow:Release()
+    end)
+
+    sg:AddChild(editbox)
+
+    self.importWindow:AddChild(sg)
+end
+
 function PajMarker:ShowGUI()
     if self.window ~= nil then
         self:Print("GUI already open :)")
@@ -104,7 +191,7 @@ function PajMarker:ShowGUI()
         firstKey = add_new_list
         tabs = {}
         local numTabs = 0
-        for listKey, listValue in pairs(localLists) do
+        for listKey, listValue in orderedpairs(localLists) do
             if first then
                 first = false
                 firstKey = listKey
@@ -118,9 +205,6 @@ function PajMarker:ShowGUI()
     end
 
     undoChangesButton:SetCallback("OnClick", function()
-        for listKey, listValue in pairs(originalList) do
-            self:Print(listKey)
-        end
         localLists = deepCopy(originalList)
         updateTabs()
         updateGroup()
@@ -268,7 +352,6 @@ function PajMarker:ShowGUI()
                     localLists[group][mobName] = nil
                         local scrollFrameStatus = scrollFrame.status or scrollFrame.localstatus
                         local oldScrollValue = scrollFrameStatus.scrollvalue
-                        self:Print(oldScrollValue)
                         scrollFrame:PauseLayout()
                         updateGroup()
                         scrollFrame:SetScroll(oldScrollValue)
@@ -289,9 +372,27 @@ function PajMarker:ShowGUI()
                 localLists[group][mobName] = {}
                 widget:SetText("")
                 refreshGroup()
-                -- self:Print("Add monster :)" .. text)
             end)
             g:AddChild(newMonster)
+
+            local renameList = AceGUI:Create("EditBox")
+            renameList:SetLabel("Rename list")
+            -- By default, this should be the old group name
+            renameList:SetText(group)
+            renameList:SetCallback("OnEnterPressed", function(widget, _, newName)
+                local oldName = group
+                if newName == oldName then
+                    -- Nothing changed, do nothing
+                    return
+                end
+
+                self:Print("Renaming list to " .. newName)
+                localLists[newName] = localLists[oldName]
+                localLists[oldName] = nil
+                updateTabs()
+                tabGroup:SelectTab(newName)
+            end)
+            g:AddChild(renameList)
 
             local deleteList = AceGUI:Create("Button")
             deleteList:SetText("Delete list")

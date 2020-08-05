@@ -38,6 +38,14 @@ function PajMarker:InitializeChatCommands()
             func = "PMHandleUsage",
             hidden = true,
         },
+        export = {
+            func = "ExportLists",
+            usage = "Export lists to a string",
+        },
+        import = {
+            func = "ImportLists",
+            usage = "Import lists from a string",
+        },
     }
 end
 
