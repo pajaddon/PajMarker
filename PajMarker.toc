@@ -10,7 +10,7 @@
 ## Author: Pajlada
 ## DefaultState: enabled
 ## LoadOnDemand: 0
-## SavedVariables: Enabled
+## SavedVariables: DB
 ## Version: 1.0.6
 
 Libs\ChatThrottleLib\ChatThrottleLib.xml
@@ -19,4 +19,7 @@ helpers.lua
 const.lua
 config.lua
 main.lua
+chatcommands.lua
+events.lua
+gui.lua
 settings.lua
