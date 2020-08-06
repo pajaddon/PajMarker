@@ -91,7 +91,7 @@ function PajMarker:PMHandleReset()
     self:ResetSession()
 end
 
-function PajMarker:HandleSaveOldLists()
+function PajMarker:PMHandleSaveOldLists()
     self:Print("Attempting to save old lists")
     self:Print("The addon assumes that: config.lua (or another file) has been manually added to PajMarker.toc and contains a global 'lists' variable")
     if lists == nil then
