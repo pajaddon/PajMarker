@@ -88,7 +88,7 @@ function PajMarker:PMHandleLists()
 end
 
 function PajMarker:PMHandleReset()
-    self:PMReset(commands, command_i + 1)
+    self:ResetSession()
 end
 
 function PajMarker:HandleSaveOldLists()
