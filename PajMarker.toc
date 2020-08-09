@@ -17,7 +17,6 @@ Libs\ChatThrottleLib\ChatThrottleLib.xml
 embeds.xml
 helpers.lua
 const.lua
-config.lua
 main.lua
 chatcommands.lua
 events.lua
