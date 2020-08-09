@@ -24,6 +24,7 @@ function PajMarker:OnInitialize()
     local defaults = {
         profile = {
             enabled = true,
+            trySwitchListOnTarget = true,
             resetOnListChange = false,
         }
     }
@@ -51,6 +52,15 @@ function PajMarker:OnInitialize()
                         get = function(info) return PajMarker.db.profile.enabled end,
                         width = "full",
                         order = 10,
+                    },
+                    trySwitchListOnTarget = {
+                        type = "toggle",
+                        name = "Auto switch lists",
+                        desc = "Automatically try to switch list when targeting a new unit",
+                        set = function(info, val) PajMarker.db.profile.trySwitchListOnTarget = val; PajMarker:RefreshConfig() end,
+                        get = function(info) return PajMarker.db.profile.trySwitchListOnTarget end,
+                        width = "full",
+                        order = 11,
                     },
                     resetOnListChange = {
                         type = "toggle",

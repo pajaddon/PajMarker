@@ -35,7 +35,9 @@ function PajMarker:PLAYER_TARGET_CHANGED()
         return
     end
 
-    self:TrySwitchList(unitName)
+    if self.db.profile.trySwitchListOnTarget then
+        self:TrySwitchList(unitName)
+    end
 
     self:TryMarkUnit("target")
 end
