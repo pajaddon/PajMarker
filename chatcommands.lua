@@ -15,8 +15,8 @@ function PajMarker:InitializeChatCommands()
             usage = "Configure lists",
         },
         list = {
-            func = "PMHandleLists",
-            hidden = true,
+            func = "PMHandleList",
+            usage = "Change list (e.g. /pm list bwl technician trash)",
         },
         reset = {
             func = "PMHandleReset",
@@ -85,6 +85,28 @@ end
 
 function PajMarker:PMHandleLists()
     self:ConfigureLists()
+end
+
+function PajMarker:PMHandleList(commands, command_i)
+    local listName = commands[command_i]
+    command_i = command_i + 1
+    local ll = nil
+
+    repeat
+        ll = commands[command_i]
+        if ll ~= nil then
+            listName = listName .. " " .. ll
+        end
+        command_i = command_i + 1
+    until (ll == nil)
+
+    if listName == nil then
+        self:PMHandleUsage()
+        return
+    end
+    if not self:SwitchList(listName) then
+        self:Print("No list named " .. listName .. " exists")
+    end
 end
 
 function PajMarker:PMHandleReset()

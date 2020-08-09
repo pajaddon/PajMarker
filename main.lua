@@ -210,16 +210,28 @@ end
 -- Try to switch to the list containing the given unit
 -- UNDEFINED BEHAVIOUR: If a unit is contained within multiple lists, the list that will be chosen is ??
 function PajMarker:TrySwitchList(unitName)
-    local trigger = self.triggers[unitName]
+    local listName = self.triggers[unitName]
 
-    if trigger ~= nil and trigger ~= self.currentList then
-        self:Print("Switching to list " .. trigger)
-        self.currentList = trigger
-
-        if self.db.profile.resetOnListChange then
-            self:ResetSession()
+    if listName ~= nil and listName ~= self.currentList then
+        if not self:SwitchList(listName) then
+            self:Print("Something went seriously wrong - we had a trigger to switch to a list that doesn't exist!")
         end
     end
+end
+
+function PajMarker:SwitchList(listName)
+    if self.lists[listName] == nil then
+        return false
+    end
+
+    self:Print("Switched to list " .. listName)
+    self.currentList = listName
+
+    if self.db.profile.resetOnListChange then
+        self:ResetSession()
+    end
+
+    return true
 end
 
 function PajMarker:ResetSession()
