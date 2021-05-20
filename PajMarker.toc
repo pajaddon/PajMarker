@@ -1,9 +1,6 @@
-#@retail@
-## Interface: 80300
-#@end-retail@
-#@non-retail@
-## Interface: 11305
-#@end-non-retail@
+## Interface: 90005
+## Interface-BCC: 20501
+## Interface-Classic: 11307
 ## X-Curse-Project-ID: 382225
 ## Title: PajMarker
 ## Notes: mark stuff
@@ -11,7 +8,7 @@
 ## DefaultState: enabled
 ## LoadOnDemand: 0
 ## SavedVariables: DB
-## Version: 2.0.2
+## Version: @project-version@
 
 Libs\ChatThrottleLib\ChatThrottleLib.xml
 embeds.xml
