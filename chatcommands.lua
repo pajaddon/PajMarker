@@ -41,10 +41,6 @@ function PajMarker:InitializeChatCommands()
             func = "PMHandleReset",
             usage = "Reset the current session",
         },
-        saveoldlists = {
-            func = "PMHandleSaveOldLists",
-            usage = "Save old list into new saving method",
-        },
         clear = {
             func = "PMHandleClear",
             usage = "Clear all raid markers currently assigned to units",
@@ -130,17 +126,6 @@ end
 
 function PajMarker:PMHandleReset()
     self:ResetSession()
-end
-
-function PajMarker:PMHandleSaveOldLists()
-    self:Print("Attempting to save old lists")
-    self:Print("The addon assumes that: config.lua (or another file) has been manually added to PajMarker.toc and contains a global 'lists' variable")
-    if lists == nil then
-        self:Print("ERROR: No global variable 'lists' found - ensure config.lua (or another file) is listed in PajMarker.toc (and fully restart the game)")
-        return
-    end
-
-    self.db.profile.lists = self.libs.AceSerializer:Serialize(lists)
 end
 
 function PajMarker:HandlePM(msg, editbox)
