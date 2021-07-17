@@ -122,7 +122,12 @@ function PajMarker:RefreshConfig()
     end
 
     if self.db.profile.lists then
-        success, self.lists = self.libs.AceSerializer:Deserialize(self.db.profile.lists)
+        local success, deserializeResult = self.libs.AceSerializer:Deserialize(self.db.profile.lists)
+        if not success then
+            self:Print("Error loading list")
+        else
+            self.lists = deserializeResult
+        end
     else
         self.lists = {}
     end
