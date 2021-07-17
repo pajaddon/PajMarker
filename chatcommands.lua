@@ -90,7 +90,7 @@ end
 function PajMarker:PMHandleList(commands, command_i)
     local listName = commands[command_i]
     command_i = command_i + 1
-    local ll = nil
+    local ll
 
     repeat
         ll = commands[command_i]
