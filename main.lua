@@ -168,8 +168,6 @@ function PajMarker:TryMarkUnit(unit)
         return
     end
 
-    local currentTarget = GetRaidTargetIndex(unit)
-
     -- Have we already marked this unit in this session?
     if self.session[unitGuid] ~= nil then
         -- self:Print("Already marked guid")
