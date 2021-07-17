@@ -145,38 +145,9 @@ function PajMarker:ShowGUI()
 
     self.window:AddChild(tabGroup)
 
-    local NONE = 0
-    local STAR = 1
-    local CIRCLE = 2
-    local DIAMOND = 3
-    local TRIANGLE = 4
-    local MOON = 5
-    local SQUARE = 6
-    local CROSS = 7
-    local SKULL = 8
-
     local add_new_list = "___add-new-list-xd-dont-name-a-list-this-secret-code"
 
-    -- local testList = {};
-    -- testList["Death Talon Wyrmkin"] = {DIAMOND, STAR}; -- Sleep targets
-    -- testList["Death Talon Captain"] = {TRIANGLE}; -- Kite target
-    -- testList["Death Talon Flamescale"] = {CROSS, SQUARE, CIRCLE}; -- DPS target
-    -- testList["Death Talon Seether"] = {SKULL, CROSS, SQUARE, CIRCLE}; -- DPS target
-
-    -- local testList2 = {};
-    -- testList2["Blackwing Warlock"] = {SKULL, CROSS} -- Melee Focus
-    -- testList2["Death Talon Overseer"] = {SQUARE, CIRCLE, CROSS} -- Dragon guy
-    -- testList2["Blackwing Spellbinder"] = {STAR,DIAMOND} -- Kite Target
-    -- testList2["Blackwing Technician"] = {} -- Kite Target
-    -- testList2["Death Talon Wyrmguard"] = {SKULL , CROSS, SQUARE} --Big boys
-
-    -- local testList3 = {};
-
     local localLists = deepCopy(self.lists)
-
-    -- lists["vael"] = testList;
-    -- lists["zg"] = testList3;
-    -- lists["labs"] = testList2;
 
     local originalList = deepCopy(localLists)
 
