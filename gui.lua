@@ -1,4 +1,4 @@
-local addonName = ...
+local addonName, addonTable = ...
 
 function PajMarker:ShowExportWindow()
     if self.exportWindow ~= nil then
@@ -275,7 +275,7 @@ function PajMarker:ShowGUI()
 
                 local first = true
 
-                local calculatedIcons = deepCopy(AVAILABLE_MARKS)
+                local calculatedIcons = deepCopy(addonTable.AVAILABLE_MARKS)
 
                 for markName, mark in pairs(calculatedIcons) do
                     local score = -1
