@@ -1,7 +1,9 @@
-## Interface: 90005
-## Interface-BCC: 20502
-## Interface-Classic: 11307
+## Interface: 90200
+## Interface-BCC: 20504
+## Interface-Classic: 11403
 ## X-Curse-Project-ID: 382225
+## X-WoWI-ID: 26303
+## X-Wago-ID: 0mKOBE6x
 ## Title: PajMarker
 ## Notes: mark stuff
 ## Author: Pajlada
